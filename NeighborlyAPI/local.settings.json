@@ -5,7 +5,7 @@
     "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=neighborlyst;AccountKey=VQfkTSI2WbBYjK4dkvDoajAdmw4G2tJLDUYDCEOb9kq29HEmwLKEPwTSp/q0G1qOym/T06lKszfZmFpVCnJ5Mg==",
     "APPINSIGHTS_INSTRUMENTATIONKEY": "114c4678-c99a-431e-aefd-d96b1a18a77f",
     "FUNCTIONS_EXTENSION_VERSION": "~2",
-    "MongoDBConnectionString": "mongodb://neighborly-app-cosmos:MJFwUScqM9g1MoFeoSb5IbTOfIoXkMLvMCfeQSkeLqiiLVHHiGbpqm2oysFQa5oueRQifbyv1QT7JBuayDIkrQ==@neighborly-app-cosmos.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@neighborly-app-cosmos@"
+    "MongoDBConnectionString": "<ADD_CONNECTION_STRING>"
   },
   "ConnectionStrings": {}
 }
