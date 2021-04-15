@@ -18,10 +18,29 @@
   - [Deploying the client-side Flask web application](#deploying-the-client-side-flask-web-application)
   - [CI/CD deployment](#cicd-deployment)
     - [Deploy your client app](#deploy-your-client-app)
-    - [TBD](#tbd)
+    - [Create an Azure Container Registry](#create-an-azure-container-registry)
+    - [Dockerize your Azure Functions](#dockerize-your-azure-functions)
+    - [Push the container to the Azure Container Registry](#push-the-container-to-the-azure-container-registry)
+    - [Create a Kubernetes Cluster](#create-a-kubernetes-cluster)
+    - [Deploy app to Kubernetes](#deploy-app-to-kubernetes)
   - [Event Hubs and Logic App](#event-hubs-and-logic-app)
+    - [Create a Logic App that watches for an HTTP trigger](#create-a-logic-app-that-watches-for-an-http-trigger)
+    - [Create a namespace for event hub in the portal](#create-a-namespace-for-event-hub-in-the-portal)
+    - [Add the connection string of the event hub to the Azure Function](#add-the-connection-string-of-the-event-hub-to-the-azure-function)
 - [Clean-up](#clean-up)
 - [Screenshots](#screenshots)
+  - [Serverless Functions](#serverless-functions)
+    - [Database](#database)
+    - [Triggers in Azure](#triggers-in-azure)
+    - [Triggers Connect to Database](#triggers-connect-to-database)
+    - [Flask Front End: Localhost](#flask-front-end-localhost)
+  - [Logic Apps & Event Hubs](#logic-apps--event-hubs)
+    - [Logic App](#logic-app)
+    - [Event Hub](#event-hub)
+  - [Deploying Your Application](#deploying-your-application)
+    - [App Service Deployment](#app-service-deployment)
+    - [Dockerfile](#dockerfile)
+    - [Kubernetes](#kubernetes)
 - [References](#references)
 - [Requirements](#requirements)
 - [License](#license)
@@ -54,6 +73,7 @@ You will need to install the following locally:
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
 - [Azure Tools for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack)
 - [MongoDB](https://docs.mongodb.com/manual/installation/)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/)
 
 ## Instructions
 
@@ -94,7 +114,7 @@ az storage account create \
     --location eastus
 ```
 
-Then we create our container: 
+Then we create our container:
 
 TBD: Is it required?
 
@@ -138,7 +158,7 @@ az cosmosdb create \
     --name $COSMOS_ACCOUNT \
     --resource-group $RESOURCE_GROUP \
     --kind MongoDB \
-    --locations regionName=$REGION failoverPriority=0 isZoneRedundant=False 
+    --locations regionName=$REGION failoverPriority=0 isZoneRedundant=False
 ```
 
 This step may take a little while to complete (15-20 minutes in some cases).
@@ -217,7 +237,7 @@ You can get the primary password from the Azure Portal on the Azure Cosmos DB se
 
 #### Add connection string to API files
 
-You need to hook up your connection string into the NeighborlyAPI server folder. You will need to replace the *url* variable with your own connection string you copy-and-pasted in the last step, along with some additional information. Check out [this post](https://docs.microsoft.com/en-us/azure/cosmos-db/connect-mongodb-account) if you need help with what information is needed.
+You need to hook up your connection string into the NeighborlyAPI server folder. You will need to replace the _url_ variable with your own connection string you copy-and-pasted in the last step, along with some additional information. Check out [this post](https://docs.microsoft.com/en-us/azure/cosmos-db/connect-mongodb-account) if you need help with what information is needed.
 
 Go to each of the `__init__.py` files in `getPosts`, `getPost`, `getAdvertisements`, `getAdvertisement`, `deleteAdvertisement`, `updateAdvertisement`, `createAdvertisements` and replace your connection string. You will also need to set the related `database` and `collection` appropriately.
 
@@ -242,7 +262,7 @@ Fetch app settings:
 func azure functionapp fetch-app-settings neighborly-api-v1
 ```
 
-Add connection string to ```local.settings.json```:
+Add connection string to `local.settings.json`:
 
 ```bash
 {
@@ -296,7 +316,7 @@ Use a text editor to update the API_URL to your published url from the last step
 #API_URL = "http://localhost:7071/api"
 
 # ------- For production -------
-# where APP_NAME is your Azure Function App name 
+# where APP_NAME is your Azure Function App name
 API_URL="https://neighborly-api-v1.azurewebsites.net/api"
 ```
 
@@ -310,55 +330,261 @@ Use a different app name here to deploy the front-end, or else you will erase yo
 - Go into the pip env shell with `pipenv shell`
 - Deploy your application to the app service:
 
-    ```bash
-    az webapp up --sku F1 -n neighborly-app --resource-group neighborly-app-rg
-    ```
+  ```bash
+  az webapp up \
+    --sku F1 \
+    --name neighborly-app \
+    --resource-group neighborly-app-rg \
+    --location eastus
+  ```
 
 - If you want to update your app, make changes to your code and then run:
 
-    ```bash
-    az webapp up \
-        --name neighborly-app \
-        --verbose
-    ```
+  ```bash
+  az webapp up \
+    --name neighborly-app \
+    --verbose
+  ```
 
 Make sure to also provide any necessary information in `settings.py` to move from localhost to your deployment (see [above](#deploying-the-client-side-flask-web-application)).
 
-#### TBD
+#### Create an Azure Container Registry
 
-1. Create an Azure Registry and dockerize your Azure Functions. Then, push the container to the Azure Container Registry.
-2. Create a Kubernetes cluster, and verify your connection to it with `kubectl get nodes`.
-3. Deploy app to Kubernetes, and check your deployment with `kubectl config get-contexts`.
+Create an Azure Container Registry to dockerize your Azure Functions:
+
+![Create Azure Container Registry](create-container-registry.png)
+
+Instead of the Azure Portal, you can also use the Azure CLI:
+
+```bash
+az acr create \
+    --resource-group neighborly-app-rg \
+    --name neighborlyappcr \
+    --sku Basic
+```
+
+This create the Azure Container Registry `neighborlyappcr.azurecr.io`.
+
+#### Dockerize your Azure Functions
+
+Switch to your Azure Functions folder and create a Docker file with the following command:
+
+```bash
+func init --docker-only
+```
+
+Then build the Docker image:
+
+```bash
+docker build -t neighborly-app-image:v1 .
+```
+
+Test the image locally.
+
+```bash
+docker run -e MongoDBConnectionString=<MongoDBConnectionString> -p8080:80 neighborly-app-image:v1
+```
+
+#### Push the container to the Azure Container Registry
+
+To use the ACR instance, you must first log in:
+
+```bash
+az acr login --name neighborlyappcr
+```
+
+Now, tag your local image with the ARC server address. To indicate the image version, add `:v1` to the end of the image name:
+
+```bash
+docker tag neighborly-app-image:latest neighborlyappcr.azurecr.io/neighborly-app-image:v1
+```
+
+With your image built and tagged, push it to your ACR instance:
+
+```bash
+docker push neighborlyappcr.azurecr.io/neighborly-app-image:v1
+```
+
+Confirm the image has been stored on the ARC instance:
+
+```bash
+az acr repository list --name neighborlyappcr --output table
+az acr repository show-tags --name neighborlyappcr --repository neighborly-app-image --output table
+```
+
+#### Create a Kubernetes Cluster
+
+Create a Kubernetes cluster:
+
+```bash
+az aks create \
+    --resource-group neighborly-app-rg \
+    --name neighborlyappaks \
+    --node-count 2 \
+    --generate-ssh-keys \
+    --attach-acr neighborlyappcr
+```
+
+To configure `kubectl` to connect to your Kubernetes cluster, use the `az aks get-credentials` command:
+
+```bash
+az aks get-credentials \
+    --name neighborlyappaks \
+    --resource-group neighborly-app-rg
+```
+
+To verify the connection to your cluster, run the `kubectl get nodes` command to return a list of the cluster nodes:
+
+```bash
+kubectl get nodes
+```
+
+If everything worked, you should output similar to:
+
+```bash
+NAME                                STATUS   ROLES   AGE   VERSION
+aks-nodepool1-08854386-vmss000000   Ready    agent   93s   v1.18.14
+aks-nodepool1-08854386-vmss000001   Ready    agent   92s   v1.18.14
+```
+
+#### Deploy app to Kubernetes
+
+KEDA is Google's opensource tool for Kubernetes event-driven Autoscaling. Let's set up the KEDA namespace for our Kubernetes cluster:
+
+```bash
+func kubernetes install --namespace keda
+```
+
+Now we are ready to deploy. First do a dry run and write deploy YAML file:
+
+```bash
+func kubernetes deploy \
+    --name neighborly-app \
+    --image-name neighborlyappcr.azurecr.io/neighborly-app-image:v1 \
+    --dry-run > deploy.yml
+```
+
+Now we are ready to do the deployment:
+
+```bash
+func kubernetes deploy \
+    --name neighborly-app \
+    --image-name neighborlyappcr.azurecr.io/neighborly-app-image:v1 \
+    --polling-interval 3 \
+    --cooldown-period 5
+
+kubectl apply -f deploy.yml
+```
+
+The output should be similar to this:
+
+```bash
+deployment "neighborly-app-http" successfully rolled out
+	createAdvertisement - [httpTrigger]
+	Invoke url: http://20.185.103.38/api/createadvertisement
+
+	deleteAdvertisement - [httpTrigger]
+	Invoke url: http://20.185.103.38/api/deleteadvertisement
+
+	getAdvertisement - [httpTrigger]
+	Invoke url: http://20.185.103.38/api/getadvertisement
+
+	getAdvertisements - [httpTrigger]
+	Invoke url: http://20.185.103.38/api/getadvertisements
+
+	getPost - [httpTrigger]
+	Invoke url: http://20.185.103.38/api/getpost
+
+	getPosts - [httpTrigger]
+	Invoke url: http://20.185.103.38/api/getposts
+
+	updateAdvertisement - [httpTrigger]
+	Invoke url: http://20.185.103.38/api/updateadvertisement
+```
+
+Check your deployment with `kubectl config get-contexts`:
+
+```bash
+CURRENT   NAME               CLUSTER            AUTHINFO                                         NAMESPACE
+*         neighborlyappaks   neighborlyappaks   clusterUser_neighborly-app-rg_neighborlyappaks
+```
 
 ### Event Hubs and Logic App
 
-1. Create a Logic App that watches for an HTTP trigger. When the HTTP request is triggered, send yourself an email notification.
-2. Create a namespace for event hub in the portal. You should be able to obtain the namespace URL.
-3. Add the connection string of the event hub to the Azure Function.
+#### Create a Logic App that watches for an HTTP trigger
+
+When the HTTP request is triggered, send yourself an email notification.
+
+#### Create a namespace for event hub in the portal
+
+You should be able to obtain the namespace URL.
+
+#### Add the connection string of the event hub to the Azure Function
 
 ## Clean-up
-
-TBD
 
 Clean up and remove all services, or else you will incur charges:
 
 ```bash
-# replace with your resource group
-RESOURCE_GROUP="<YOUR-RESOURCE-GROUP>"
-# run this command
-az group delete --name $RESOURCE_GROUP
+az group delete --name neighborly-app-rg
 ```
 
 ## Screenshots
 
-1. TBD
+### Serverless Functions
+
+#### Database
+
+- A screenshot from the Azure portal showing the database & collections
+- A screenshot from the terminal giving confirmation that the two pieces of sample data for advertisements (5 documents) and posts (4 documents) were imported correctly, or include this data in the live website.
+
+TBD
 
 ![]()
+
+#### Triggers in Azure
+
+A screenshot, including URL, from the Azure portal where it is shown what endpoints are live.
+
+#### Triggers Connect to Database
+
+A screenshot, including URL, of at least the data returned from querying the getAdvertisements endpoint; other endpoints will be checked for reasonableness within the related code files.
+
+#### Flask Front End: Localhost
+
+A screenshot of the front-end appropriately pulling up posts when you visit localhost. Note that if you have provided a screenshot or URL to a live site with the front-end later on in the assignment, that can also be used as proof here.
+
+### Logic Apps & Event Hubs
+
+#### Logic App
+
+A screenshot from your inbox notification.
+
+#### Event Hub
+
+A screenshot with the namespace URL.
+
+### Deploying Your Application
+
+#### App Service Deployment
+
+The live url from Azure App Service (which should be accessible to all users on the World Wide Web), or a screenshot should be provided, including the URL, of the previously live site.
+
+#### Dockerfile
+
+A screenshot of the Dockerfile from Azure Container Registry as evidence.
+
+#### Kubernetes
+
+A screenshot of confirmation from the terminal, or from within Azure, as evidence.
 
 ## References
 
 - [Develop, test, and deploy an Azure Function with Visual Studio](https://docs.microsoft.com/en-us/learn/modules/develop-test-deploy-azure-functions-with-visual-studio)
 - [Work with NoSQL data in Azure Cosmos DB](https://docs.microsoft.com/en-us/learn/paths/work-with-nosql-data-in-azure-cosmos-db)
+- [Build and store container images with Azure Container Registry](https://docs.microsoft.com/en-us/learn/modules/build-and-store-container-images)
+- [Run Docker containers with Azure Container Instances](https://docs.microsoft.com/en-us/learn/modules/run-docker-with-azure-container-instances)
+- [Deploy and run a containerized web app with Azure App Service](https://docs.microsoft.com/en-us/learn/modules/deploy-run-container-app-service)
 
 ## Requirements
 
