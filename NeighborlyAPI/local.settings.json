@@ -2,9 +2,9 @@
   "IsEncrypted": false,
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "python",
-    "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=neighborlyst;AccountKey=VQfkTSI2WbBYjK4dkvDoajAdmw4G2tJLDUYDCEOb9kq29HEmwLKEPwTSp/q0G1qOym/T06lKszfZmFpVCnJ5Mg==",
-    "APPINSIGHTS_INSTRUMENTATIONKEY": "114c4678-c99a-431e-aefd-d96b1a18a77f",
-    "FUNCTIONS_EXTENSION_VERSION": "~2",
+    "AzureWebJobsStorage": "<Run func azure functionapp fetch-app-settings>",
+    "APPINSIGHTS_INSTRUMENTATIONKEY": "<Run func azure functionapp fetch-app-settings>",
+    "FUNCTIONS_EXTENSION_VERSION": "<Run func azure functionapp fetch-app-settings>",
     "MongoDBConnectionString": "<ADD_CONNECTION_STRING>"
   },
   "ConnectionStrings": {}
