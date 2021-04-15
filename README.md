@@ -17,7 +17,9 @@
     - [Deploy your Azure Functions](#deploy-your-azure-functions)
   - [Deploying the client-side Flask web application](#deploying-the-client-side-flask-web-application)
   - [CI/CD deployment](#cicd-deployment)
-  - [IV. Event Hubs and Logic App](#iv-event-hubs-and-logic-app)
+    - [Deploy your client app](#deploy-your-client-app)
+    - [TBD](#tbd)
+  - [Event Hubs and Logic App](#event-hubs-and-logic-app)
 - [Clean-up](#clean-up)
 - [Screenshots](#screenshots)
 - [References](#references)
@@ -283,11 +285,10 @@ Save the function app url [https://neighborly-api-v1.azurewebsites.net/api/](htt
 
 ### Deploying the client-side Flask web application
 
-TBD
+We are going to update the Client-side `settings.py` with published API endpoints. First navigate to the `settings.py` file in the `NeighborlyFrontEnd/` directory.
 
-We are going to update the Client-side `settings.py` with published API endpoints. First navigate to the `settings.py` file in the NeighborlyFrontEnd/ directory.
+Use a text editor to update the API_URL to your published url from the last step:
 
-Use a text editor to update the API_URL to your published url from the last step.
 ```bash
 # Inside file settings.py
 
@@ -296,25 +297,40 @@ Use a text editor to update the API_URL to your published url from the last step
 
 # ------- For production -------
 # where APP_NAME is your Azure Function App name 
-API_URL="https://<APP_NAME>.azurewebsites.net/api"
+API_URL="https://neighborly-api-v1.azurewebsites.net/api"
 ```
 
 ### CI/CD deployment
 
-TBD
+#### Deploy your client app
 
-1. Deploy your client app. **Note:** Use a **different** app name here to deploy the front-end, or else you will erase your API. From within the `NeighborlyFrontEnd` directory:
-    - Install dependencies with `pipenv install`
-    - Go into the pip env shell with `pipenv shell`
-    - Deploy your application to the app service. **Note:** It may take a minute or two for the front-end to get up and running if you visit the related URL.
+Use a different app name here to deploy the front-end, or else you will erase your API. From within the `NeighborlyFrontEnd` directory:
 
-    Make sure to also provide any necessary information in `settings.py` to move from localhost to your deployment.
+- Install dependencies with `pipenv install`
+- Go into the pip env shell with `pipenv shell`
+- Deploy your application to the app service:
 
-2. Create an Azure Registry and dockerize your Azure Functions. Then, push the container to the Azure Container Registry.
-3. Create a Kubernetes cluster, and verify your connection to it with `kubectl get nodes`.
-4. Deploy app to Kubernetes, and check your deployment with `kubectl config get-contexts`.
+    ```bash
+    az webapp up --sku F1 -n neighborly-app --resource-group neighborly-app-rg
+    ```
 
-### IV. Event Hubs and Logic App
+- If you want to update your app, make changes to your code and then run:
+
+    ```bash
+    az webapp up \
+        --name neighborly-app \
+        --verbose
+    ```
+
+Make sure to also provide any necessary information in `settings.py` to move from localhost to your deployment (see [above](#deploying-the-client-side-flask-web-application)).
+
+#### TBD
+
+1. Create an Azure Registry and dockerize your Azure Functions. Then, push the container to the Azure Container Registry.
+2. Create a Kubernetes cluster, and verify your connection to it with `kubectl get nodes`.
+3. Deploy app to Kubernetes, and check your deployment with `kubectl config get-contexts`.
+
+### Event Hubs and Logic App
 
 1. Create a Logic App that watches for an HTTP trigger. When the HTTP request is triggered, send yourself an email notification.
 2. Create a namespace for event hub in the portal. You should be able to obtain the namespace URL.
@@ -340,8 +356,6 @@ az group delete --name $RESOURCE_GROUP
 ![]()
 
 ## References
-
-TBD
 
 - [Develop, test, and deploy an Azure Function with Visual Studio](https://docs.microsoft.com/en-us/learn/modules/develop-test-deploy-azure-functions-with-visual-studio)
 - [Work with NoSQL data in Azure Cosmos DB](https://docs.microsoft.com/en-us/learn/paths/work-with-nosql-data-in-azure-cosmos-db)
