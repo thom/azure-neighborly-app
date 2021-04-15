@@ -4,6 +4,7 @@ import json
 from bson.json_util import dumps
 from bson.objectid import ObjectId
 
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
 
     id = req.params.get('id')
