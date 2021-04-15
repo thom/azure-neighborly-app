@@ -9,7 +9,8 @@
       "methods": [
         "get",
         "post"
-      ]
+      ],
+      "connection": "MongoDBConnectionString"
     },
     {
       "type": "http",

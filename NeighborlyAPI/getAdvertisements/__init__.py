@@ -1,13 +1,14 @@
 import azure.functions as func
 import pymongo
 import json
+import os
 from bson.json_util import dumps
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
-        url = "localhost"  # TODO: Update with appropriate MongoDB connection information
+        url = os.environ['MongoDBConnectionString']
         client = pymongo.MongoClient(url)
         database = client['neighborly-app-cosmos-db']
         collection = database['advertisements']
