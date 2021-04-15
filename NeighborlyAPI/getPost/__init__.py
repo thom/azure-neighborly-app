@@ -13,7 +13,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         try:
             url = "localhost"  # TODO: Update with appropriate MongoDB connection information
             client = pymongo.MongoClient(url)
-            database = client['azure']
+            database = client['neighborly-app-cosmos-db']
             collection = database['posts']
 
             query = {'_id': ObjectId(id)}
