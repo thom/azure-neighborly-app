@@ -480,26 +480,26 @@ The output should be similar to this:
 
 ```bash
 deployment "neighborly-app-http" successfully rolled out
-	createAdvertisement - [httpTrigger]
-	Invoke url: http://20.185.103.38/api/createadvertisement
+    createAdvertisement - [httpTrigger]
+    Invoke url: http://20.185.103.38/api/createadvertisement
 
-	deleteAdvertisement - [httpTrigger]
-	Invoke url: http://20.185.103.38/api/deleteadvertisement
+    deleteAdvertisement - [httpTrigger]
+    Invoke url: http://20.185.103.38/api/deleteadvertisement
 
-	getAdvertisement - [httpTrigger]
-	Invoke url: http://20.185.103.38/api/getadvertisement
+    getAdvertisement - [httpTrigger]
+    Invoke url: http://20.185.103.38/api/getadvertisement
 
-	getAdvertisements - [httpTrigger]
-	Invoke url: http://20.185.103.38/api/getadvertisements
+    getAdvertisements - [httpTrigger]
+    Invoke url: http://20.185.103.38/api/getadvertisements
 
-	getPost - [httpTrigger]
-	Invoke url: http://20.185.103.38/api/getpost
+    getPost - [httpTrigger]
+    Invoke url: http://20.185.103.38/api/getpost
 
-	getPosts - [httpTrigger]
-	Invoke url: http://20.185.103.38/api/getposts
+    getPosts - [httpTrigger]
+    Invoke url: http://20.185.103.38/api/getposts
 
-	updateAdvertisement - [httpTrigger]
-	Invoke url: http://20.185.103.38/api/updateadvertisement
+    updateAdvertisement - [httpTrigger]
+    Invoke url: http://20.185.103.38/api/updateadvertisement
 ```
 
 Check your deployment with `kubectl config get-contexts`:
@@ -513,13 +513,55 @@ CURRENT   NAME               CLUSTER            AUTHINFO                        
 
 #### Create a Logic App that watches for an HTTP trigger
 
-When the HTTP request is triggered, send yourself an email notification.
+With Azure Logic Apps and the SendGrid connector, you can automate tasks and workflows that send emails. We will utilize SendGrid with the Logic App Designer to be able to send emails when a new ad is added.
+
+1. Create a SendGrid account [here](https://sendgrid.com/). You can use the free service in this exercise, which is enough for our purposes.
+2. Login and generate a SendGrid key
+   - Your API key is located [here](https://app.sendgrid.com/settings/api_keys).
+   - Save it down and keep it safe, since that will be used to send emails later on. You will only see this once.
+3. Next, you'll use the Logic App Designer with an HTTP Trigger:
+   - Login to the Azure Portal.
+   - Go to Resources and create a Logic App.
+   - Select Blank Logic Apps template.
+   - In the search box, search for "http". Select HTTP.
+4. Use Neighborly app URLs.
+5. Then, click on New step and configure your SendGrid email. Add a new connection using the API key from earlier.
+6. Fill in the missing to/from and body fields for the email. For the subject, write "test from logic app designer", or whatever subject you would like.
+
+Instead of creating a SendGrid account, you can also use Gmail or Outlook.com.
 
 #### Create a namespace for event hub in the portal
 
-You should be able to obtain the namespace URL.
+1. Create a new Event Hub Namespace in the Azure Portal:
+
+![Event Hub Namespace](images/event-hub-namespace.png)
+
+2. Create a new Event Hub in the Namespace:
+
+![Event Hub](images/event-hub.png)
 
 #### Add the connection string of the event hub to the Azure Function
+
+1. Add a new share access policy
+
+![Event Hub Shared Access Policy](images/event-hub-shared-access-policy.png)
+
+2. Add the connection string to the `eventHubTrigger` Azure Function `function.json`:
+
+    ```json
+    {
+    "scriptFile": "__init__.py",
+    "bindings": [
+        {
+        "type": "eventGridTrigger",
+        "name": "event",
+        "direction": "in",
+        "eventHubName": "testhub", 
+        "connection": "Endpoint=sb://neighborly.servicebus.windows.net/;SharedAccessKeyName=neighborly-policy;SharedAccessKey=+HAAGHlnFayIPG9jnQ2/Qf9kMUJFU0xWvmFLjvLZRW8=;EntityPath=neighborly-hub"
+        }
+    ]
+    }
+    ```
 
 ## Clean-up
 
