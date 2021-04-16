@@ -509,6 +509,13 @@ CURRENT   NAME               CLUSTER            AUTHINFO                        
 *         neighborlyappaks   neighborlyappaks   clusterUser_neighborly-app-rg_neighborlyappaks
 ```
 
+Check PODs and services:
+
+```bash
+kubectl get pods
+kubectl get services
+```
+
 ### Event Hubs and Logic App
 
 #### Create a Logic App that watches for an HTTP trigger
@@ -577,48 +584,71 @@ az group delete --name neighborly-app-rg
 
 #### Database
 
-- A screenshot from the Azure portal showing the database & collections
-- A screenshot from the terminal giving confirmation that the two pieces of sample data for advertisements (5 documents) and posts (4 documents) were imported correctly, or include this data in the live website.
+A screenshot from the Azure portal showing the database & collections:
 
-TBD
+![Database & collections](images/cosmos-db.png)
 
-![]()
+A screenshot from the terminal giving confirmation that the two pieces of sample data for advertisements (5 documents) and posts (4 documents) were imported correctly and include this data in the live website:
+
+![mongoimport](images/mongoimport.png)
+
+![Live website](images/neighborly-app.png)
 
 #### Triggers in Azure
 
-A screenshot, including URL, from the Azure portal where it is shown what endpoints are live.
+A screenshot, including URL, from the Azure portal where it is shown what endpoints are live:
+
+![Functions](images/functions.png)
 
 #### Triggers Connect to Database
 
-A screenshot, including URL, of at least the data returned from querying the getAdvertisements endpoint; other endpoints will be checked for reasonableness within the related code files.
+A screenshot, including URL, of at least the data returned from querying the getAdvertisements endpoint:
+
+![getAdvertisements](images/getadvertisements.png)
 
 #### Flask Front End: Localhost
 
-A screenshot of the front-end appropriately pulling up posts when you visit localhost. Note that if you have provided a screenshot or URL to a live site with the front-end later on in the assignment, that can also be used as proof here.
+A screenshot of the front-end appropriately pulling up posts when you visit localhost:
+
+![Localhost](images/neighborly-app-localhost.png)
 
 ### Logic Apps & Event Hubs
 
 #### Logic App
 
-A screenshot from your inbox notification.
+A screenshot from your inbox notification:
+
+![Inbox notification](images/logic-app-email.png)
 
 #### Event Hub
 
-A screenshot with the namespace URL.
+A screenshot with the namespace URL:
+
+![Event Hub](images/event-hub-shared-access-policy.png)
 
 ### Deploying Your Application
 
 #### App Service Deployment
 
-The live url from Azure App Service (which should be accessible to all users on the World Wide Web), or a screenshot should be provided, including the URL, of the previously live site.
+A screenshot of the live site:
+
+![Live website](images/neighborly-app.png)
 
 #### Dockerfile
 
-A screenshot of the Dockerfile from Azure Container Registry as evidence.
+A screenshot of the Dockerfile from Azure Container Registry:
+
+![Dockerfile](images/dockerfile.png)
 
 #### Kubernetes
 
-A screenshot of confirmation from the terminal, or from within Azure, as evidence.
+A screenshot of confirmation from the terminal, or from within Azure:
+
+![Kubernetes: Terminal](images/kubernetes-terminal.png)
+
+![Kubernetes: Azure Portal](images/kubernetes-azure-portal.png)
+
+![Kubernetes: API](images/kubernetes-api.png)
 
 ## References
 
