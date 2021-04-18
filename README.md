@@ -268,10 +268,10 @@ Add connection string to `local.settings.json`:
 {
   "IsEncrypted": true,
   "Values": {
-    "FUNCTIONS_WORKER_RUNTIME": "<from fetch-app-settings>".
-    "FUNCTIONS_EXTENSION_VERSION": "<from fetch-app-settings>".
-    "AzureWebJobsStorage": "<from fetch-app-settings>".
-    "APPINSIGHTS_INSTRUMENTATIONKEY": "<from fetch-app-settings>".
+    "FUNCTIONS_WORKER_RUNTIME": "<from fetch-app-settings>",
+    "FUNCTIONS_EXTENSION_VERSION": "<from fetch-app-settings>",
+    "AzureWebJobsStorage": "<from fetch-app-settings>",
+    "APPINSIGHTS_INSTRUMENTATIONKEY": "<from fetch-app-settings>",
     "MongoDBConnectionString": "", # TODO: set your MongoDB connection string
   },
   "ConnectionStrings": {}
